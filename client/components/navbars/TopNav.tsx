@@ -1,15 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Bell,
-  PlusCircle,
-  MessageCircle,
-  Search,
-} from "lucide-react";
+import { Bell, PlusCircle, MessageCircle, Search } from "lucide-react";
+import LoginModal from "@/components/auth/LoginModal";
+import SignupModal from "@/components/auth/SignupModal";
 
 const navItems = [
   { label: "Home", href: "/" },
@@ -19,6 +16,24 @@ const navItems = [
 
 const TopNav: React.FC = () => {
   const pathname = usePathname();
+
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+
+  const openLogin = () => {
+    setIsSignupOpen(false);
+    setIsLoginOpen(true);
+  };
+
+  const openSignup = () => {
+    setIsLoginOpen(false);
+    setIsSignupOpen(true);
+  };
+
+  const closeAll = () => {
+    setIsLoginOpen(false);
+    setIsSignupOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#030303]/95 backdrop-blur">
@@ -49,7 +64,6 @@ const TopNav: React.FC = () => {
         </div>
 
         <div className="flex-1 max-w-50" />
-
 
         <nav className="hidden items-center gap-2 lg:flex">
           {navItems.map((item) => {
@@ -83,19 +97,38 @@ const TopNav: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/login"
+          <button
+            onClick={openLogin}
             className="hidden rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-zinc-400 md:inline-block"
           >
             Log In
-          </Link>
-          <Link
-            href="/signup"
+          </button>
+          <button
+            onClick={openSignup}
             className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-black hover:bg-white"
           >
             Sign Up
-          </Link>
+          </button>
         </div>
+
+        {/* Modals mounted once, at the bottom of TopNav JSX */}
+        <LoginModal
+          isOpen={isLoginOpen}
+          onClose={closeAll}
+          onSwitchToSignup={() => {
+            setIsLoginOpen(false);
+            setIsSignupOpen(true);
+          }}
+        />
+
+        <SignupModal
+          isOpen={isSignupOpen}
+          onClose={closeAll}
+          onSwitchToLogin={() => {
+            setIsSignupOpen(false);
+            setIsLoginOpen(true);
+          }}
+        />
       </div>
     </header>
   );
