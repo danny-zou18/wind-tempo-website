@@ -30,9 +30,7 @@ export default function RootLayout({
         <TopNav />
         <div className="flex min-h-[calc(100vh-3rem)]">
           <Sidebar />
-          <main className="flex-1 px-4 py-4">
-            {children}
-          </main>
+          <main className="ml-60 flex w-full h-full min-h-[calc(100vh-56px)] px-4 py-4 ">{children}</main>
         </div>
       </body>
     </html>
