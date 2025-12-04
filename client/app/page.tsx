@@ -6,6 +6,8 @@ import Link from "next/link";
 import CreatePost from "@/components/homepage/CreatePost";
 import Posts from "@/components/homepage/Posts";
 import AboutCard from "@/components/homepage/AboutCard";
+import GetStartedCard from "@/components/homepage/GetStartedCard";
+import LatestPatchCard from "@/components/homepage/LatestPatchCard";
 
 import { Flame } from "lucide-react";
 
@@ -26,6 +28,8 @@ export default function Home() {
       </section>
       <aside className="hidden lg:flex w-80 flex-col gap-4">
         <AboutCard />
+        <GetStartedCard />
+        <LatestPatchCard />
       </aside>
     </div>
   );
