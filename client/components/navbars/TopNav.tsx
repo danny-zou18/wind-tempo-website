@@ -39,19 +39,18 @@ const TopNav: React.FC = () => {
     <>
       <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#030303]/95 backdrop-blur">
         <div className="flex w-full items-center gap-3 px-10 py-2">
-          <Link href="/" className="flex items-center gap-2 px-2">
-            <div className="relative h-11 w-11">
+          <Link href="/" className="flex bg-">
+            <div className="relative h-11 w-36">
               <Image
                 src="/logo.png"
                 alt="Wind Tempo"
                 fill
-                sizes="45px"
                 className="rounded-md object-contain"
               />
             </div>
           </Link>
 
-          <div className="flex-1 max-w-50" />
+          <div className="flex-1 max-w-45" />
 
           <div className="flex-1">
             <div className="flex items-center gap-2 rounded-full border border-zinc-700 bg-[#1a1a1b] px-3 py-1.5 focus-within:border-zinc-400">
