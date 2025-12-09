@@ -18,16 +18,40 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.message || "Invalid email or password.");
+        return;
+      }
+
+      // If login is successful, you can:
+      // - close the modal
+      // - optionally refresh the page or update some global auth state
+      onClose();
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      console.log("Email:", email);
-      console.log("Password:", password);
-    }, 800);
+    }
   };
 
   return (
@@ -36,7 +60,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         <div>
           <label
             htmlFor="login-email"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Email
           </label>
@@ -47,7 +71,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="you@example.com"
           />
         </div>
@@ -55,7 +79,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         <div className="relative">
           <label
             htmlFor="login-password"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Password
           </label>
@@ -68,7 +92,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             required
             minLength={6}
             autoComplete="current-password"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="••••••••"
           />
 
@@ -79,6 +103,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
             aria-label="Toggle password visibility"
           >
             {showPassword ? (
+              // eye-off icon
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -94,6 +119,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 />
               </svg>
             ) : (
+              // eye icon
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -113,10 +139,16 @@ const LoginModal: React.FC<LoginModalProps> = ({
           </button>
         </div>
 
+        {error && (
+          <p className="text-xs text-red-400">
+            {error}
+          </p>
+        )}
+
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-medium py-2 text-sm transition"
+          className="w-full rounded-lg bg-emerald-500 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Logging in..." : "Log In"}
         </button>
@@ -127,7 +159,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
         <button
           type="button"
           onClick={onSwitchToSignup}
-          className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+          className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300"
         >
           Sign up
         </button>
