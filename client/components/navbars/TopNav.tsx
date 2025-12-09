@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,11 +14,21 @@ const navItems = [
   { label: "Patch Notes", href: "/patch-notes" },
 ];
 
+type SessionUser = {
+  id: string;
+  username: string;
+  email: string;
+};
+
 const TopNav: React.FC = () => {
   const pathname = usePathname();
 
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+
+  const [currentUser, setCurrentUser] = useState<SessionUser | null | undefined>(
+    undefined
+  ); // undefined = loading
 
   const openLogin = () => {
     setIsSignupOpen(false);
@@ -33,6 +43,35 @@ const TopNav: React.FC = () => {
   const closeAll = () => {
     setIsLoginOpen(false);
     setIsSignupOpen(false);
+  };
+
+  // fetch current session on mount
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/auth/session", { cache: "no-store" });
+        if (!res.ok) {
+          setCurrentUser(null);
+          return;
+        }
+        const data = await res.json();
+        setCurrentUser(data.user); // null or user
+      } catch {
+        setCurrentUser(null);
+      }
+    };
+
+    load();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+      setCurrentUser(null);
+      closeAll();
+    } catch {
+      // ignore for now
+    }
   };
 
   return (
@@ -99,21 +138,38 @@ const TopNav: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={openLogin}
-              className="hidden rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-zinc-400 md:inline-block"
-            >
-              Log In
-            </button>
-            <button
-              onClick={openSignup}
-              className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-black hover:bg-white"
-            >
-              Sign Up
-            </button>
+            {currentUser ? (
+              <>
+                <span className="hidden text-xs text-zinc-300 md:inline">
+                  {currentUser.username}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-zinc-400"
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={openLogin}
+                  className="hidden rounded-full border border-zinc-600 px-3 py-1.5 text-xs font-semibold text-zinc-100 hover:border-zinc-400 md:inline-block"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={openSignup}
+                  className="rounded-full bg-zinc-100 px-3 py-1.5 text-xs font-semibold text-black hover:bg-white"
+                >
+                  Sign Up
+                </button>
+              </>
+            )}
           </div>
         </div>
       </header>
+
       <LoginModal
         isOpen={isLoginOpen}
         onClose={closeAll}
