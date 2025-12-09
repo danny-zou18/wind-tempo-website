@@ -34,7 +34,11 @@ export default function RootLayout({
           <TopNav />
           <div className="flex min-h-[calc(100vh-3rem)]">
             <Sidebar />
-            <main className="flex-1 px-4 py-4">{children}</main>
+            <main className="flex-1 bg-zinc-50 dark:bg-[#030303] transition-colors">
+              <div className="mx-auto w-full max-w-7xl px-6 py-6">
+                {children}
+              </div>
+            </main>
           </div>
         </ThemeProvider>
       </body>

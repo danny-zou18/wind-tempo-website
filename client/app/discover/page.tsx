@@ -49,7 +49,7 @@ export default function DiscoverPage() {
   const subtleText = "text-sm text-zinc-400";
 
   return (
-    <div className={pageClasses}>
+    <div className={`${pageClasses} w-full`}>
       {/* Header + search */}
       <section className="space-y-4">
         <div className="space-y-2">
