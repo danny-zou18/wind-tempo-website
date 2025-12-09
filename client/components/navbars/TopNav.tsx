@@ -64,6 +64,20 @@ const TopNav: React.FC = () => {
     load();
   }, []);
 
+  const refreshSession = async () => {
+    try {
+      const res = await fetch("/api/auth/session", { cache: "no-store" });
+      if (!res.ok) {
+        setCurrentUser(null);
+        return;
+      }
+      const data = await res.json();
+      setCurrentUser(data.user ?? null);
+    } catch {
+      setCurrentUser(null);
+    }
+  };
+  
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST" });
@@ -177,6 +191,7 @@ const TopNav: React.FC = () => {
           setIsLoginOpen(false);
           setIsSignupOpen(true);
         }}
+        onLoggedIn={refreshSession}
       />
 
       <SignupModal
@@ -186,6 +201,7 @@ const TopNav: React.FC = () => {
           setIsSignupOpen(false);
           setIsLoginOpen(true);
         }}
+        onSignedUp={refreshSession} 
       />
     </>
   );

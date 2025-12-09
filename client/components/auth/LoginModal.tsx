@@ -7,12 +7,14 @@ type LoginModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToSignup: () => void;
+  onLoggedIn?: () => void;          // 👈 NEW
 };
 
 const LoginModal: React.FC<LoginModalProps> = ({
   isOpen,
   onClose,
   onSwitchToSignup,
+  onLoggedIn,                       // 👈 NEW
 }) => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -28,9 +30,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -40,9 +40,12 @@ const LoginModal: React.FC<LoginModalProps> = ({
         return;
       }
 
-      // If login is successful, you can:
-      // - close the modal
-      // - optionally refresh the page or update some global auth state
+      // ✅ tell TopNav to refresh session
+      if (onLoggedIn) {
+        await onLoggedIn();
+      }
+
+      // then close + reset
       onClose();
       setEmail("");
       setPassword("");
@@ -102,8 +105,9 @@ const LoginModal: React.FC<LoginModalProps> = ({
             className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-200"
             aria-label="Toggle password visibility"
           >
+            {/* your SVGs unchanged */}
             {showPassword ? (
-              // eye-off icon
+              /* eye-off svg */
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -119,7 +123,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
                 />
               </svg>
             ) : (
-              // eye icon
+              /* eye svg */
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -139,11 +143,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
           </button>
         </div>
 
-        {error && (
-          <p className="text-xs text-red-400">
-            {error}
-          </p>
-        )}
+        {error && <p className="text-xs text-red-400">{error}</p>}
 
         <button
           type="submit"
