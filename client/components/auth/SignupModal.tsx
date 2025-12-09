@@ -26,7 +26,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
   const [error, setError] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -37,13 +37,41 @@ const SignupModal: React.FC<SignupModalProps> = ({
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim(),
+          username: username.trim(),
+          password,
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        setError(data?.message || "Could not create account.");
+        return;
+      }
+
+      // Option 1: close and switch to login
+      setEmail("");
+      setUsername("");
+      setPassword("");
+      setConfirmPassword("");
+      onClose();
+      onSwitchToLogin();
+
+      // Option 2: you could also auto-log them in here later
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      console.log("Email:", email);
-      console.log("Username:", username);
-      console.log("Password:", password);
-      // onClose(); // optionally close after signup
-    }, 800);
+    }
   };
 
   return (
@@ -52,7 +80,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         <div>
           <label
             htmlFor="signup-email"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Email
           </label>
@@ -63,7 +91,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="you@example.com"
           />
         </div>
@@ -71,7 +99,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         <div>
           <label
             htmlFor="signup-username"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Username
           </label>
@@ -82,7 +110,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             onChange={(e) => setUsername(e.target.value)}
             required
             autoComplete="username"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="windtempo_user"
           />
         </div>
@@ -90,7 +118,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         <div className="relative">
           <label
             htmlFor="signup-password"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Password
           </label>
@@ -103,7 +131,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             required
             minLength={6}
             autoComplete="new-password"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="••••••••"
           />
 
@@ -113,6 +141,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-200"
           >
             {showPassword ? (
+              // eye-off
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -128,6 +157,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
                 />
               </svg>
             ) : (
+              // eye
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -150,7 +180,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         <div className="relative">
           <label
             htmlFor="signup-confirm-password"
-            className="block text-sm font-medium mb-1 text-slate-200"
+            className="mb-1 block text-sm font-medium text-slate-200"
           >
             Confirm Password
           </label>
@@ -163,7 +193,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             required
             minLength={6}
             autoComplete="new-password"
-            className="w-full rounded-lg bg-slate-950 border border-slate-700 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 pr-10"
+            className="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 pr-10 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
             placeholder="••••••••"
           />
 
@@ -173,6 +203,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
             className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-200"
           >
             {showConfirmPassword ? (
+              // eye-off
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -188,6 +219,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
                 />
               </svg>
             ) : (
+              // eye
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -208,13 +240,13 @@ const SignupModal: React.FC<SignupModalProps> = ({
         </div>
 
         {error && (
-          <p className="text-red-400 text-sm text-center">{error}</p>
+          <p className="text-center text-sm text-red-400">{error}</p>
         )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-medium py-2 text-sm transition"
+          className="w-full rounded-lg bg-emerald-500 py-2 text-sm font-medium text-slate-950 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Creating account..." : "Sign Up"}
         </button>
@@ -225,7 +257,7 @@ const SignupModal: React.FC<SignupModalProps> = ({
         <button
           type="button"
           onClick={onSwitchToLogin}
-          className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+          className="text-emerald-400 underline underline-offset-2 hover:text-emerald-300"
         >
           Log in
         </button>
